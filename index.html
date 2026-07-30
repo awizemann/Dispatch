@@ -7,12 +7,19 @@
 <meta name="description" content="Dispatch is a native macOS app that links your local repos as projects and lets the Claude Code sessions you already run in them ask each other questions over a local MCP bus. Four verbs, human-created links only, nothing leaves your Mac.">
 <meta name="theme-color" content="#0F1210" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F5F6F4" media="(prefers-color-scheme: light)">
+<meta property="og:site_name" content="Dispatch">
 <meta property="og:title" content="Dispatch — a switchboard between your local repos">
 <meta property="og:description" content="Link repos as projects; Dispatch merges one entry into each repo's .mcp.json. From then on, your own Claude Code sessions can ask each other questions over a local MCP bus — four verbs, human-created links only.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://awizemann.github.io/Dispatch/">
-<meta property="og:image" content="https://awizemann.github.io/Dispatch/assets/icon.png">
+<meta property="og:image" content="https://awizemann.github.io/Dispatch/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Dispatch — a switchboard between your local repos">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dispatch — a switchboard between your local repos">
+<meta name="twitter:description" content="Your own Claude Code sessions, asking each other questions over a local MCP bus. Four verbs, human-created links only, nothing leaves your Mac.">
+<meta name="twitter:image" content="https://awizemann.github.io/Dispatch/assets/og-image.png">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -102,7 +109,7 @@
       "name": "What macOS version and tools do I need?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "macOS 26 (Tahoe) or later, and the Claude Code CLI installed and on your PATH in each repo you want to link — Dispatch never installs or runs it for you. Building from source additionally needs a recent Xcode."
+        "text": "macOS 14 (Sonoma) or later, and the Claude Code CLI installed and on your PATH in each repo you want to link — Dispatch never installs or runs it for you. Building from source additionally needs a recent Xcode."
       }
     }
   ]
@@ -158,7 +165,7 @@
           </a>
           <a class="btn btn-ghost" href="https://github.com/awizemann/Dispatch">View on GitHub</a>
         </div>
-        <p class="meta">v1.0.0 · macOS 26 (Tahoe)+ · <a href="https://github.com/awizemann/Dispatch/releases/latest">Release notes</a></p>
+        <p class="meta">v1.0.0 · macOS 14 (Sonoma)+ · <a href="https://github.com/awizemann/Dispatch/releases/latest">Release notes</a></p>
       </div>
       <div class="hero-art">
         <picture class="pic">
@@ -339,7 +346,7 @@
         <div>
           <h3 class="h3-tight">Prerequisites</h3>
           <ul class="bullets">
-            <li>macOS 26 (Tahoe) or later, recent Xcode</li>
+            <li>macOS 14 (Sonoma) or later, recent Xcode</li>
             <li>The <a href="https://claude.com/claude-code">Claude Code CLI</a> on your <code>$PATH</code> — Dispatch never installs or spawns it, but it's what runs in each linked repo</li>
             <li>Two git repositories you actually work in — one repo alone has nobody to ask</li>
           </ul>
@@ -438,7 +445,7 @@ cd Dispatch
         <details>
           <summary>What macOS version and tools do I need?</summary>
           <div>
-            <p>macOS 26 (Tahoe) or later, and the <a href="https://claude.com/claude-code">Claude Code CLI</a> installed and on your <code>$PATH</code> in each repo you want to link — Dispatch never installs or runs it for you. Building from source additionally needs a recent Xcode.</p>
+            <p>macOS 14 (Sonoma) or later, and the <a href="https://claude.com/claude-code">Claude Code CLI</a> installed and on your <code>$PATH</code> in each repo you want to link — Dispatch never installs or runs it for you. Building from source additionally needs a recent Xcode.</p>
           </div>
         </details>
         <details>
