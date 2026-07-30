@@ -26,31 +26,36 @@ enum Motion {
 
 // MARK: - Working dots blink
 
-/// The agent "working" blink: opacity 1 → 0.2 → 1 over 1.2s, repeat forever.
+/// The agent "working" blink: opacity 1 → 0.2 → 1 over 1.2s, forever.
 /// Honors Reduce Motion by holding a static mid opacity instead of blinking
 /// (deviation from scaffold, approved 2026-07-05 — the scaffold only documents
 /// the blink in a comment).
+///
+/// PERF: deliberately NOT a `.repeatForever` animation. A repeat-forever
+/// SwiftUI animation keeps NSHostingView committing a display-list update
+/// every display frame (120/s on ProMotion) for as long as the node is
+/// visible — the always-on ticker dot alone held the whole app at ~25% idle
+/// CPU (idle-CPU investigation, 2026-07-30). Instead a periodic TimelineView
+/// toggles the dim state on the blink's half-period and a SHORT one-shot ease
+/// smooths each toggle, so the render loop only runs during the brief ease
+/// and sleeps the rest of the cycle.
 private struct WorkingDotsModifier: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var dimmed = false
+
+    /// Half-period of the blink (dim ↔ bright), matching the old 1.2s cycle.
+    private static let halfPeriod: TimeInterval = 0.6
 
     func body(content: Content) -> some View {
         blinking(content)
-            // PERF (dogfood-2 item 3 — the review-rail stall). This is the app's
-            // ONLY `.repeatForever` animation. When the animated node is still a
-            // LIVE, independent accessibility element, SwiftUI keeps the a11y
-            // frame in lock-step with the animating presentation — so it drives a
-            // CA commit EVERY frame, and each commit runs
-            // AccessibilityNode.updateFocusResponder, an O(view-tree) walk over
-            // the WHOLE window. A blinking `.checking` chip in a rail therefore
-            // pegged the main thread for as long as it blinked (typing/layout
-            // lag). The proof was already in the tree:
-            // the always-on ticker blink never stalled because its dot is
-            // accessibility-hidden. Collapsing the animated subtree into ONE
-            // combined element (its label derives from the static child text, not
-            // the opacity) drops the per-child participating nodes, so the blink
-            // hands off to CoreAnimation and no longer forces the per-frame walk.
-            // Callers still layer their own `.accessibilityLabel` /
+            // PERF (dogfood-2 item 3 — the review-rail stall). When the animated
+            // node is a LIVE, independent accessibility element, every animation
+            // commit runs AccessibilityNode.updateFocusResponder, an O(view-tree)
+            // walk over the WHOLE window — a blinking `.checking` chip in a rail
+            // pegged the main thread for as long as it blinked. Collapsing the
+            // animated subtree into ONE combined element (its label derives from
+            // the static child text, not the opacity) drops the per-child
+            // participating nodes and keeps the blink off that walk. Callers
+            // still layer their own `.accessibilityLabel` /
             // `.accessibilityHidden` on top — those override this element.
             .accessibilityElement(children: .combine)
     }
@@ -60,13 +65,14 @@ private struct WorkingDotsModifier: ViewModifier {
         if reduceMotion {
             content.opacity(0.6)
         } else {
-            content
-                .opacity(dimmed ? 0.2 : 1)
-                .animation(
-                    .easeInOut(duration: 0.6).repeatForever(autoreverses: true),
-                    value: dimmed
-                )
-                .onAppear { dimmed = true }
+            TimelineView(.periodic(from: .now, by: Self.halfPeriod)) { context in
+                let dimmed = Int(
+                    context.date.timeIntervalSinceReferenceDate / Self.halfPeriod
+                ) % 2 == 0
+                content
+                    .opacity(dimmed ? 0.2 : 1)
+                    .animation(.easeInOut(duration: 0.2), value: dimmed)
+            }
         }
     }
 }
@@ -87,13 +93,20 @@ extension View {
 /// holding a static ~0.7 opacity (WorkingDotsModifier precedent).
 ///
 /// A skeleton bar carries no information, so the animated node is
-/// accessibility-hidden. Beyond being semantically correct, that keeps this
-/// `.repeatForever` animation OFF the per-frame accessibility walk that a live,
-/// independent animating a11y element would force (see WorkingDotsModifier's
-/// PERF note) — a hidden node doesn't participate.
+/// accessibility-hidden. Beyond being semantically correct, that keeps the
+/// pulse OFF the per-frame accessibility walk that a live, independent
+/// animating a11y element would force (see WorkingDotsModifier's PERF note) —
+/// a hidden node doesn't participate.
+///
+/// PERF: same discrete-tick pattern as WorkingDotsModifier — a periodic
+/// TimelineView with a short one-shot ease per toggle, never `.repeatForever`,
+/// which would hold the main-thread render loop hot every display frame for
+/// as long as the skeleton is visible.
 private struct SkeletonPulseModifier: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var dimmed = false
+
+    /// Half-period of the pulse (dim ↔ bright), matching the old ~2.2s cycle.
+    private static let halfPeriod: TimeInterval = 1.1
 
     func body(content: Content) -> some View {
         pulsing(content)
@@ -105,13 +118,14 @@ private struct SkeletonPulseModifier: ViewModifier {
         if reduceMotion {
             content.opacity(0.7)
         } else {
-            content
-                .opacity(dimmed ? 0.45 : 1)
-                .animation(
-                    .easeInOut(duration: 1.1).repeatForever(autoreverses: true),
-                    value: dimmed
-                )
-                .onAppear { dimmed = true }
+            TimelineView(.periodic(from: .now, by: Self.halfPeriod)) { context in
+                let dimmed = Int(
+                    context.date.timeIntervalSinceReferenceDate / Self.halfPeriod
+                ) % 2 == 0
+                content
+                    .opacity(dimmed ? 0.45 : 1)
+                    .animation(.easeInOut(duration: 0.35), value: dimmed)
+            }
         }
     }
 }
