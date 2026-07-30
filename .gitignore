@@ -19,3 +19,6 @@ xcuserdata/
 *.profraw
 .DS_Store
 **/.DS_Store
+
+# Release build artifacts (RELEASE_NOTES.md is committed; the notarized zip is not)
+releases/**/*.zip
