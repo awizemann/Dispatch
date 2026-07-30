@@ -142,8 +142,11 @@ if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
   die "tag 'v${VERSION}' already exists. Bump the version or delete the tag."
 fi
 
-# Codesign identity present.
-security find-identity -v -p codesigning | grep -q "$SIGNING_IDENTITY" \
+# Codesign identity present. Capture first, then grep — piping a small producer
+# straight into `grep -q` can hand the producer a SIGPIPE (grep exits on match
+# and closes the pipe), which `set -o pipefail` would turn into a false failure.
+CODESIGN_IDS="$(security find-identity -v -p codesigning 2>/dev/null || true)"
+grep -q "$SIGNING_IDENTITY" <<<"$CODESIGN_IDS" \
   || die "no '$SIGNING_IDENTITY' identity in login Keychain. See header for setup."
 
 # Notary profile present (no listing API; test with a cheap history call).
@@ -269,8 +272,13 @@ GOT_ID="$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$PLIST")"
 
 # Confirm the export is Developer-ID signed with hardened runtime (notarization posture).
 log "Verifying code signature"
-codesign -dvvv "$APP_PATH" 2>&1 | grep -q "Authority=Developer ID Application" \
-  || die "exported app is not Developer ID signed."
+# Capture then grep — codesign keeps writing after the Authority line, so piping
+# it into `grep -q` SIGPIPEs codesign and `set -o pipefail` reports a false
+# "not signed." (This bit the first 1.0.0 draft; the app was signed correctly.)
+SIGN_INFO="$(codesign -dvvv "$APP_PATH" 2>&1 || true)"
+grep -q "Authority=Developer ID Application" <<<"$SIGN_INFO" \
+  || die "exported app is not Developer ID signed. Got:
+$SIGN_INFO"
 codesign --verify --strict --verbose=2 "$APP_PATH" 2>&1 | sed 's/^/    /'
 
 # ---------- notarize ----------
