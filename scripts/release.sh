@@ -31,11 +31,12 @@ fi
 #   1. Developer ID Application cert installed in the login Keychain.
 #        security find-identity -v -p codesigning | grep "Developer ID Application"
 #      (Dispatch signs as: Alan Wizemann (3Q6X2L86C4) — see scripts/SIGNING.md.)
-#   2. App Store Connect API key stored for notarytool as profile "dispatch-notary":
-#        xcrun notarytool store-credentials "dispatch-notary" \
-#          --key ~/.private/AuthKey_XXXX.p8 --key-id <KEY_ID> --issuer <ISSUER_ID>
-#      OR reuse another profile under the same Apple developer + Team ID via the
-#      env var, e.g.:  DISPATCH_NOTARY_PROFILE=harness-notary ./release.sh 1.0.0
+#   2. A notarytool keychain profile for your Apple Developer account (Team
+#      3Q6X2L86C4). Defaults to the shared "harness-notary" profile — the same
+#      credential the Harness/Scarf releases use — so no new setup is needed.
+#      Use a different one with:  DISPATCH_NOTARY_PROFILE=<name> ./release.sh 1.0.0
+#      (To create a fresh one:  xcrun notarytool store-credentials <name> \
+#         --key ~/.private/AuthKey_XXXX.p8 --key-id <KEY_ID> --issuer <ISSUER_ID>)
 #   3. gh CLI authed with write access to awizemann/Dispatch:
 #        gh auth status
 #
@@ -63,7 +64,7 @@ Dispatch release pipeline — build, sign, notarize, package, and publish a GitH
 
 Requires (see the header of this script for setup):
   - "Developer ID Application" cert in the login Keychain (team 3Q6X2L86C4)
-  - notarytool profile "dispatch-notary" (or set DISPATCH_NOTARY_PROFILE)
+  - notarytool profile (defaults to shared "harness-notary"; override with DISPATCH_NOTARY_PROFILE)
   - gh authenticated with write access to awizemann/Dispatch
   - (optional) releases/v<VERSION>/RELEASE_NOTES.md for a real changelog
     (without it the release gets a generic note)
@@ -82,7 +83,7 @@ BUNDLE_ID="com.wizemann.dispatch"
 SCHEME="Dispatch"
 PROJECT="Dispatch.xcodeproj"
 PBXPROJ="Dispatch.xcodeproj/project.pbxproj"
-NOTARY_PROFILE="${DISPATCH_NOTARY_PROFILE:-dispatch-notary}"
+NOTARY_PROFILE="${DISPATCH_NOTARY_PROFILE:-harness-notary}"
 SIGNING_IDENTITY="Developer ID Application"
 GH_REPO="awizemann/Dispatch"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
