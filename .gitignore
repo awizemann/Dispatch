@@ -22,3 +22,6 @@ xcuserdata/
 
 # Release build artifacts (RELEASE_NOTES.md is committed; the notarized zip is not)
 releases/**/*.zip
+
+# GitHub Pages publish worktree (managed by scripts/site.sh)
+.gh-pages-worktree/
