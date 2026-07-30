@@ -1,0 +1,21 @@
+# Memophant app-local state (machine-specific, not for git)
+sessions/.raw/
+sessions/.index.json
+
+# Memophant — gitignored derived caches (code index, parser state).
+.memophant/
+
+.claude/memophant-activity.log
+
+# Xcode / Swift Package Manager
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+.build/
+.swiftpm/
+*.profraw
+.DS_Store
+**/.DS_Store

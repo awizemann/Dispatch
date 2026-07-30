@@ -1,0 +1,6 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Bundled audio assets are binary — never LF-normalize.
+*.caf binary
+*.wav binary

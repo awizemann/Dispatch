@@ -1,0 +1,1 @@
+[Repo](https://github.com/awizemann/Dispatch) · [Issues](https://github.com/awizemann/Dispatch/issues) · [License: MIT](https://github.com/awizemann/Dispatch/blob/main/LICENSE) · [Wiki Maintenance](Wiki-Maintenance)

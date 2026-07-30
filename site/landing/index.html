@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dispatch — a switchboard between your local repos</title>
+<meta name="description" content="Dispatch is a native macOS app that links your local repos as projects and lets the Claude Code sessions you already run in them ask each other questions over a local MCP bus. Four verbs, human-created links only, nothing leaves your Mac.">
+<meta name="theme-color" content="#0F1210" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F5F6F4" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Dispatch — a switchboard between your local repos">
+<meta property="og:description" content="Link repos as projects; Dispatch merges one entry into each repo's .mcp.json. From then on, your own Claude Code sessions can ask each other questions over a local MCP bus — four verbs, human-created links only.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://awizemann.github.io/Dispatch/">
+<meta property="og:image" content="https://awizemann.github.io/Dispatch/assets/icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="canonical" href="https://awizemann.github.io/Dispatch/">
+<link rel="alternate" type="text/plain" title="LLM-friendly summary" href="llms.txt">
+<link rel="stylesheet" href="styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Dispatch?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Dispatch is a native macOS app that acts as a switchboard between local repos. You add each repo you work in as a project and link the pairs that should be able to talk. Linking merges one \"dispatch\" entry into that repo's own .mcp.json. From then on, the Claude Code sessions you run in those repos — your own sessions, started the normal way in your own terminal — can ask each other questions over an app-hosted localhost MCP bus."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Dispatch spawn or run Claude Code sessions itself?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Dispatch never starts a session, never queues work, and has no commit gate or QA pipeline. It only hosts the bus and relays messages between sessions you started yourself by running `claude` in a linked repo. If no session is running in a project, questions addressed to it simply wait in its inbox until one is."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can one project's session actually do to another's?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Exactly four things, all mediated by Dispatch: ask_agent (ask a linked project's session a question about its own repo), answer_agent (answer a question addressed to you), check_messages (read your inbox), and list_projects (see who you're linked to and who's connected). There is no fifth tool that runs commands, edits files, or triggers work in another repo — a question is not a task, and the receiving session decides for itself how to answer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I ask a project I haven't linked?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It fails closed. A human-created project link is the entire consent model — ask_agent cannot reach a project that isn't listed by list_projects, and there is no way to reach an unlinked project by guessing a name or id. If the project you need is missing, that's a decision for the human, not something a session can route around."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can the other project's session see my repo, my files, or this conversation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. A question crosses the bus as a single self-contained block of text — the asking session's repo, files, and conversation are never visible to the other side. Each project answers only from what it can verify in its own repo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is bus traffic trusted the way my own prompts are?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, by design. Every question and answer that crosses the bus is framed as untrusted data before it reaches the receiving session's prompt, with explicit markers and an instruction that it is content to reason about, not instructions to follow. One repo's session cannot use a bus message to make another repo's session do something its own rules would otherwise refuse."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does data leave my Mac?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not through Dispatch. The bus listener binds 127.0.0.1 only, and the only thing Dispatch writes into a repo is a single localhost URL inside its .mcp.json. Whatever a Claude Code session itself does — reach a model provider, use other tools — is between that session and its own configuration, unrelated to Dispatch."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does linking actually change in my repo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "One key. Dispatch merges a single \"dispatch\" entry into the repo's .mcp.json (creating the file if needed) and touches nothing else — your own MCP servers and any other top-level keys round-trip untouched. If a \"dispatch\" entry already exists that Dispatch didn't write, install refuses rather than overwriting it. Unlinking removes only that one key."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Dispatch open source?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, MIT licensed. The source, including the MCP bus implementation and the .mcp.json installer, is on GitHub."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What macOS version and tools do I need?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "macOS 26 (Tahoe) or later, and the Claude Code CLI installed and on your PATH in each repo you want to link — Dispatch never installs or runs it for you. Building from source additionally needs a recent Xcode."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar-row">
+    <a class="brand" href="./">
+      <img src="assets/icon.png" width="32" height="32" alt="" aria-hidden="true">
+      <span>Dispatch</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#how-it-works">How it works</a>
+      <a href="#why-safe">Why it's safe</a>
+      <a href="#get-started">Get started</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/awizemann/Dispatch">GitHub</a>
+      <a href="https://github.com/awizemann/Dispatch/wiki">Wiki</a>
+      <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle>
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- 1. Hero -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span> v{{VERSION}} · macOS · open source</p>
+        <h1>A switchboard between your local repos.</h1>
+        <p class="lede">Link the repos you already work in as projects. Dispatch merges one entry into each linked repo's <code>.mcp.json</code> — nothing else changes. From then on, the Claude Code sessions you run in those repos, your own sessions, can ask each other questions over a local MCP bus, and you see every exchange.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-download" href="https://github.com/awizemann/Dispatch/releases/download/v{{VERSION}}/Dispatch-v{{VERSION}}-Universal.zip" download>
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12"></path>
+              <path d="M7 10l5 5 5-5"></path>
+              <path d="M5 21h14"></path>
+            </svg>
+            Download for Mac
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/awizemann/Dispatch">View on GitHub</a>
+        </div>
+        <p class="meta">v{{VERSION}} · macOS 26 (Tahoe)+ · <a href="https://github.com/awizemann/Dispatch/releases/latest">Release notes</a></p>
+      </div>
+      <div class="hero-art">
+        <picture class="pic">
+          <img src="assets/screenshots/dispatch-bus-map.png"
+               alt="Dispatch showing five linked projects — Ledgerline, Driftwood, Beacon, Kestrel, and Halyard — on the Bus Map, with a scrollable list of questions and answers below"
+               width="1552" height="1024" decoding="async" fetchpriority="high">
+        </picture>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Trust strip -->
+  <aside class="trust" aria-label="At a glance">
+    <ul class="wrap">
+      <li>Native macOS</li>
+      <li>Four verbs, nothing more</li>
+      <li>Human-created links only</li>
+      <li>No agent spawning</li>
+      <li>No work queue</li>
+      <li>No accounts</li>
+      <li>Local bus (127.0.0.1)</li>
+      <li>MIT licensed</li>
+    </ul>
+  </aside>
+
+  <!-- 3. What Dispatch does (AEO load-bearing paragraph) -->
+  <section class="band what" aria-labelledby="what-title">
+    <div class="wrap">
+      <h2 id="what-title">Not a runtime. A switchboard.</h2>
+      <p>
+        <em>Dispatch is a native macOS app that links local repos you already work in and lets the Claude Code sessions running in them ask each other questions.</em>
+        You add each repo as a project; linking two projects merges a single <code>dispatch</code> entry into each one's own <code>.mcp.json</code>. Dispatch never starts a session, never queues work, and never gates a commit — it hosts one localhost MCP bus and relays messages between sessions you started yourself, over four tools: <code>ask_agent</code>, <code>answer_agent</code>, <code>check_messages</code>, <code>list_projects</code>. A project link is the whole consent model — an ask to a project you haven't linked fails closed.
+      </p>
+    </div>
+  </section>
+
+  <!-- 4. The four verbs -->
+  <section id="how-it-works" class="band band-alt" aria-labelledby="verbs-title">
+    <div class="wrap">
+      <h2 id="verbs-title">The whole agent-facing surface: four verbs.</h2>
+      <p class="sub">No fifth tool that runs commands or edits another repo's files. A question is a question, not a task — the session on the other end decides for itself how (or whether) to answer.</p>
+      <div class="cards">
+        <article class="card">
+          <span class="verb-tag">ask_agent</span>
+          <h3>Ask a linked project</h3>
+          <p>Ask another linked project's session a question about its own repo — its contract, its behavior, whether a change is safe there. Pass <code>wait_seconds</code> and, if that project is connected right now, get the answer back inline; otherwise it lands in that project's inbox.</p>
+        </article>
+        <article class="card">
+          <span class="verb-tag">answer_agent</span>
+          <h3>Answer what's yours</h3>
+          <p>Answer a question addressed to your project. Only the project a question was asked of can answer it. If the asker is waiting, your answer reaches them immediately.</p>
+        </article>
+        <article class="card">
+          <span class="verb-tag">check_messages</span>
+          <h3>Read your inbox</h3>
+          <p>Open questions still waiting on you, plus the outcome — answered or expired — of every question you asked and haven't seen yet. Each outcome is reported exactly once.</p>
+        </article>
+        <article class="card">
+          <span class="verb-tag">list_projects</span>
+          <h3>See who you're linked to</h3>
+          <p>The only projects <code>ask_agent</code> can reach. Each entry reports whether that project's session is connected right now, when it was last seen, and how many of its questions are sitting in your inbox.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Feature walkthrough -->
+  <section aria-label="How Dispatch works">
+
+    <!-- 5a. Link → one line in .mcp.json -->
+    <div class="feature">
+      <div class="wrap feature-grid">
+        <div class="feature-copy">
+          <p class="eyebrow">Link</p>
+          <h2>Add a repo as a project. Link the pairs that should talk.</h2>
+          <p>A project is a name, a repo path, and a durable bus token — nothing is cloned or copied. Linking two projects is the human's decision, made once in the app; it's the only thing that makes them reachable from each other.</p>
+          <ul class="feature-bullets">
+            <li>Value-faithful merge into <code>.mcp.json</code> — your own MCP servers and any other keys round-trip untouched</li>
+            <li>A foreign entry already named <code>dispatch</code> is reported as a conflict, never silently overwritten</li>
+            <li>Unlinking removes exactly the one key Dispatch added</li>
+          </ul>
+        </div>
+        <div class="feature-art">
+          <pre class="code"><code>{
+  "mcpServers": {
+    "dispatch": {
+      "type": "http",
+      "url": "http://127.0.0.1:&lt;port&gt;/bus/&lt;token&gt;"
+    }
+  }
+}</code></pre>
+          <p class="pic-caption">What linking merges into a repo's <code>.mcp.json</code> — one key, added or replaced, everything else untouched.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5b. Bus Map -->
+    <div class="feature alt band-alt">
+      <div class="wrap feature-grid">
+        <div class="feature-copy">
+          <p class="eyebrow">Watch</p>
+          <h2>The Bus Map shows every project and every link.</h2>
+          <p>A graph of your linked projects, plus a searchable, filterable list of every question and answer that has crossed the bus — pending, answered, expired, or closed. Filter by project, or search by question text or id.</p>
+          <ul class="feature-bullets">
+            <li>Live connection status per project — is a session actually there right now</li>
+            <li>Filter chips for pending / answered / expired / closed</li>
+            <li>Click a link in the map to filter the list to that pair</li>
+          </ul>
+        </div>
+        <div class="feature-art">
+          <picture class="pic">
+            <img src="assets/screenshots/dispatch-bus-map.png"
+                 alt="Dispatch Bus Map — a graph of five linked projects (Ledgerline, Driftwood, Beacon, Kestrel, Halyard) above a filterable list of questions between them"
+                 width="1552" height="1024" loading="lazy" decoding="async">
+          </picture>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5c. Messages tab — human in the loop -->
+    <div class="feature">
+      <div class="wrap feature-grid">
+        <div class="feature-copy">
+          <p class="eyebrow">Read &amp; answer</p>
+          <h2>Every question and answer, visible to you.</h2>
+          <p>Expand any thread in the Messages tab to read the full question, the full answer, and who answered it. Nothing crosses the bus without landing here — the human can read every exchange, and can answer a question directly from the app if the session on the other end isn't around.</p>
+          <ul class="feature-bullets">
+            <li>Full question and answer text, not a summary</li>
+            <li>Scoped to one project or across every linked project at once</li>
+            <li>The human can answer any open question themselves</li>
+          </ul>
+        </div>
+        <div class="feature-art">
+          <picture class="pic">
+            <img src="assets/screenshots/dispatch-thread-detail.png"
+                 alt="Dispatch Messages tab — expanded threads between Ledgerline and Driftwood about a sync worker and exported statement timezones, with the full question and answer text visible"
+                 width="1552" height="1024" loading="lazy" decoding="async">
+          </picture>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 6. Why it's safe -->
+  <section id="why-safe" class="band band-alt" aria-labelledby="why-safe-title">
+    <div class="wrap">
+      <h2 id="why-safe-title">Why linking two repos doesn't mean trusting each other blindly.</h2>
+      <p class="sub">Cross-repo questions are a real attack surface if you let them be. Dispatch is built so a project you link can ask, but never quietly command.</p>
+      <div class="cards">
+        <article class="card">
+          <h3>A link is consent, not a default</h3>
+          <p>Nothing is reachable until a human links it in the app. <code>ask_agent</code> checks the link before anything else fires — an ask to an unlinked project is refused, not silently dropped.</p>
+        </article>
+        <article class="card">
+          <h3>Untrusted by construction</h3>
+          <p>Every question and answer crossing the bus is wrapped in explicit content markers and a framing line telling the receiving session it's data to reason about, not instructions to follow — before it ever reaches that session's prompt.</p>
+        </article>
+        <article class="card">
+          <h3>No agent spawning, no work queue</h3>
+          <p>Dispatch starts nothing. The sessions on both ends are yours, started the normal way in your own terminal. There's no queue of tasks, no commit gate, no QA pipeline for Dispatch to abuse.</p>
+        </article>
+        <article class="card">
+          <h3>Local-only bus</h3>
+          <p>The listener binds <code>127.0.0.1</code>. The only thing Dispatch writes into your repo is a single localhost URL — nothing is sent to a Dispatch-run server, because there isn't one.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Get started -->
+  <section id="get-started" class="band" aria-labelledby="get-started-title">
+    <div class="wrap">
+      <h2 id="get-started-title">Get started</h2>
+      <p class="sub">Dispatch is pre-1.0 — the app is real and buildable today. Grab a release when one's cut, or build from source below.</p>
+
+      <div class="get-started-grid">
+        <div>
+          <h3 class="h3-tight">Prerequisites</h3>
+          <ul class="bullets">
+            <li>macOS 26 (Tahoe) or later, recent Xcode</li>
+            <li>The <a href="https://claude.com/claude-code">Claude Code CLI</a> on your <code>$PATH</code> — Dispatch never installs or spawns it, but it's what runs in each linked repo</li>
+            <li>Two git repositories you actually work in — one repo alone has nobody to ask</li>
+          </ul>
+
+          <h3 class="h3-tight">Build</h3>
+          <pre class="code"><code>git clone https://github.com/awizemann/Dispatch.git
+cd Dispatch
+./scripts/build.sh</code></pre>
+
+          <h3 class="h3-tight">Link two repos and ask a question</h3>
+          <ol class="bullets">
+            <li>Open Dispatch, click <strong>+</strong>, add both repos as projects, then link them.</li>
+            <li>Run <code>claude</code> as usual in each repo — it picks up the <code>dispatch</code> server from <code>.mcp.json</code> on start.</li>
+            <li>From one session: <em>"Use ask_agent to ask &lt;other project&gt; whether its API response still includes a field, and wait for the answer."</em></li>
+          </ol>
+
+          <p class="cta-inline">Full walkthrough, including troubleshooting, on the <a href="https://github.com/awizemann/Dispatch/wiki/Getting-Started">Getting Started</a> wiki page.</p>
+        </div>
+        <div class="feature-art">
+          <picture class="pic">
+            <img src="assets/screenshots/dispatch-thread-detail.png"
+                 alt="Dispatch Messages tab showing an answered question thread between two linked projects"
+                 width="1552" height="1024" loading="lazy" decoding="async">
+          </picture>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. FAQ -->
+  <section id="faq" class="band band-alt" aria-labelledby="faq-title">
+    <div class="wrap">
+      <h2 id="faq-title">FAQ</h2>
+      <p class="sub">Quick answers to the questions developers usually ask before installing.</p>
+      <div class="faq-list">
+        <details>
+          <summary>What is Dispatch?</summary>
+          <div>
+            <p>Dispatch is a native macOS app that acts as a switchboard between local repos. You add each repo you work in as a project and link the pairs that should be able to talk. Linking merges one <code>dispatch</code> entry into that repo's own <code>.mcp.json</code>. From then on, the Claude Code sessions you run in those repos — your own sessions, started the normal way in your own terminal — can ask each other questions over an app-hosted localhost MCP bus.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Does Dispatch spawn or run Claude Code sessions itself?</summary>
+          <div>
+            <p>No. Dispatch never starts a session, never queues work, and has no commit gate or QA pipeline. It only hosts the bus and relays messages between sessions you started yourself by running <code>claude</code> in a linked repo. If no session is running in a project, questions addressed to it simply wait in its inbox until one is.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What can one project's session actually do to another's?</summary>
+          <div>
+            <p>Exactly four things, all mediated by Dispatch: <code>ask_agent</code> (ask a linked project's session a question about its own repo), <code>answer_agent</code> (answer a question addressed to you), <code>check_messages</code> (read your inbox), and <code>list_projects</code> (see who you're linked to and who's connected). There is no fifth tool that runs commands, edits files, or triggers work in another repo — a question is not a task, and the receiving session decides for itself how to answer.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What happens if I ask a project I haven't linked?</summary>
+          <div>
+            <p>It fails closed. A human-created project link is the entire consent model — <code>ask_agent</code> cannot reach a project that isn't listed by <code>list_projects</code>, and there is no way to reach an unlinked project by guessing a name or id. If the project you need is missing, that's a decision for the human, not something a session can route around.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Can the other project's session see my repo, my files, or this conversation?</summary>
+          <div>
+            <p>No. A question crosses the bus as a single self-contained block of text — the asking session's repo, files, and conversation are never visible to the other side. Each project answers only from what it can verify in its own repo, and is expected to say plainly when it doesn't know.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Is bus traffic trusted the way my own prompts are?</summary>
+          <div>
+            <p>No, by design. Every question and answer that crosses the bus is framed as untrusted data before it reaches the receiving session's prompt, with explicit content markers and an instruction that it's content to reason about, not instructions to follow. One repo's session cannot use a bus message to make another repo's session do something its own rules would otherwise refuse.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What happens if the other session isn't running?</summary>
+          <div>
+            <p>The question sits in that project's inbox. Nothing wakes a session that isn't there — the other side picks it up the next time it calls <code>check_messages</code>, whether that's a minute later or the next day. Pass <code>wait_seconds</code> to <code>ask_agent</code> only when you want an inline answer and the other project shows as connected on <code>list_projects</code>; otherwise the ask returns a pending id immediately. Unanswered questions eventually expire, and the asker is told so — never silently dropped.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Does data leave my Mac?</summary>
+          <div>
+            <p>Not through Dispatch. The bus listener binds <code>127.0.0.1</code> only, and the only thing Dispatch writes into a repo is a single localhost URL inside its <code>.mcp.json</code>. Whatever a Claude Code session itself does — reach a model provider, use other tools — is between that session and its own configuration, unrelated to Dispatch.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What does linking actually change in my repo?</summary>
+          <div>
+            <p>One key. Dispatch merges a single <code>dispatch</code> entry into the repo's <code>.mcp.json</code> (creating the file if needed) and touches nothing else — your own MCP servers and any other top-level keys round-trip untouched. If a <code>dispatch</code> entry already exists that Dispatch didn't write, install refuses rather than overwriting it, and reports the conflict. Unlinking removes only that one key; the file itself is only deleted if Dispatch created it and removing the key leaves it an empty shell.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Is Dispatch open source?</summary>
+          <div>
+            <p>Yes, <a href="https://github.com/awizemann/Dispatch/blob/main/LICENSE">MIT licensed</a>. The source — the MCP bus implementation, the <code>.mcp.json</code> installer, the whole app — is on <a href="https://github.com/awizemann/Dispatch">GitHub</a>.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What macOS version and tools do I need?</summary>
+          <div>
+            <p>macOS 26 (Tahoe) or later, and the <a href="https://claude.com/claude-code">Claude Code CLI</a> installed and on your <code>$PATH</code> in each repo you want to link — Dispatch never installs or runs it for you. Building from source additionally needs a recent Xcode.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Is there a Windows or Linux version?</summary>
+          <div>
+            <p>No. Dispatch is a native macOS app built on SwiftUI and AppKit. There is no current Windows or Linux build.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-row">
+    <p>© 2026 Alan Wizemann · <a href="https://github.com/awizemann/Dispatch/blob/main/LICENSE">MIT</a> · <a href="https://github.com/awizemann/Dispatch">Source</a> · <a href="https://github.com/awizemann/Dispatch/wiki">Wiki</a></p>
+    <p class="footer-meta">v<code>{{VERSION}}</code> · {{LASTMOD}}</p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>

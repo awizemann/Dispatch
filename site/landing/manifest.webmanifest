@@ -1,0 +1,15 @@
+{
+  "name": "Dispatch",
+  "short_name": "Dispatch",
+  "description": "A macOS switchboard between local repos — link projects and let your own Claude Code sessions ask each other questions.",
+  "start_url": "/Dispatch/",
+  "scope": "/Dispatch/",
+  "display": "standalone",
+  "background_color": "#0F1210",
+  "theme_color": "#0F1210",
+  "icons": [
+    { "src": "/Dispatch/favicon.png",          "sizes": "64x64",  "type": "image/png" },
+    { "src": "/Dispatch/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/Dispatch/assets/icon.png",      "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
