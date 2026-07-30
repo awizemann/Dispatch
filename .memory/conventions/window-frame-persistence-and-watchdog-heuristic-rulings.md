@@ -5,10 +5,10 @@ permalink: dispatch/conventions/window-frame-persistence-and-watchdog-heuristic-
 tags: [window, watchdog, gotcha, conventions]
 source_paths: [Dispatch/App/WindowFrameAutosave.swift]
 source_paths_inferred: false
-source_sha: 5806824c6bf9f806d26d1aefcd714792d65891fa
+source_sha: 2e02e96100cf0a74f8c46fde34723901e828595a
 created: 2026-07-13
 updated: 2026-07-30
-reviewed: 2026-07-26
+reviewed: 2026-07-30
 reviewed_by: audit:claude-code (background)
 ---
 Durable outcome from dogfood round 1b (2026-07-13, commit 1d4a3fb), replacing an approach that failed in the field twice. The watchdog half of this note was struck 2026-07-29: stuck-agent detection belonged to an earlier in-app agent runtime that Dispatch does not have.

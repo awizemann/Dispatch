@@ -5,11 +5,11 @@ permalink: dispatch/decisions/decision-git-github-and-process-layer
 tags: [decision, git, github, subprocess]
 source_paths: [Dispatch/Services/GitClient.swift, Dispatch.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved]
 source_paths_inferred: false
-source_sha: a71c2b9eeb17dacf71380d0688ea097252aad6be
+source_sha: e24495a2b7b67f6aed88344545a31286318bdd6b
 created: 2026-07-05
 updated: 2026-07-29
-reviewed: 2026-07-23
-reviewed_by: audit:claude-code (background)
+reviewed: 2026-07-30
+reviewed_by: human
 ---
 
 Decided 2026-07-05 from infrastructure research. SwiftGitX (modern libgit2 wrapper, pre-1.0) stays on the watchlist if in-process status polling ever becomes a perf need.

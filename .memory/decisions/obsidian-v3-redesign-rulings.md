@@ -5,10 +5,10 @@ permalink: dispatch/decisions/obsidian-v3-redesign-rulings
 tags: [design, obsidian-v3, redesign, rulings]
 source_paths: [Dispatch/DesignSystem, Dispatch/Components/RailResizeHandle.swift, Dispatch/Views/ProjectsRail]
 source_paths_inferred: false
-source_sha: 5806824c6bf9f806d26d1aefcd714792d65891fa
+source_sha: 2e02e96100cf0a74f8c46fde34723901e828595a
 created: 2026-07-13
 updated: 2026-07-29
-reviewed: 2026-07-26
+reviewed: 2026-07-30
 reviewed_by: audit:claude-code (background)
 ---
 The Obsidian v3 shell rulings, trimmed 2026-07-29 to the ones Dispatch still ships (the work-queue card, review-rail badge and top-bar token readout rulings went with the features).

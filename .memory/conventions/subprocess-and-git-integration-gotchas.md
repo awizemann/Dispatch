@@ -5,10 +5,10 @@ permalink: dispatch/conventions/subprocess-and-git-integration-gotchas
 tags: [subprocess, git, gotcha]
 source_paths: [Dispatch/Services/GitClient.swift, Dispatch/Services/RepoBookmark.swift]
 source_paths_inferred: false
-source_sha: 66e0f7fe7990664dadbad500c027ffd07dd5fbeb
+source_sha: 2e02e96100cf0a74f8c46fde34723901e828595a
 created: 2026-07-05
 updated: 2026-07-30
-reviewed: 2026-07-23
+reviewed: 2026-07-30
 reviewed_by: audit:claude-code (background)
 ---
 

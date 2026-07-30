@@ -5,11 +5,11 @@ permalink: dispatch/conventions/shell-ui-patterns-and-verification
 tags: [swiftui, shell, verification, patterns]
 source_paths: [Dispatch/App/ThemePersistence.swift, Dispatch/DesignSystem/Theme.swift, Dispatch/Views/ProjectsRail/ProjectCardView.swift, Dispatch/Views/ProjectsRail/ProjectsRailView.swift, Dispatch/Stores/Mocks]
 source_paths_inferred: false
-source_sha: f9d6f637027e8be24b3318ecd72916731dbdb561
+source_sha: e24495a2b7b67f6aed88344545a31286318bdd6b
 created: 2026-07-05
 updated: 2026-07-18
-reviewed: 2026-07-23
-reviewed_by: audit:claude-code (background)
+reviewed: 2026-07-30
+reviewed_by: human
 ---
 
 Learned building the P0 app shell (Views/, Stores/, 2026-07-05). Also of note: project card tints are currently derived from the name's first scalar (Project DTO has no persisted tint field) — reproduces the prototype exactly today, but a persisted tint may be wanted when project creation UX matures.

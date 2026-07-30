@@ -39,3 +39,7 @@ From kickoff standard §11. Dispatch is macOS-only, but explicit -destination re
 
 
 - [gotcha] TWO test-count methods diverge by ~160 on this suite and BOTH are right: stdout `grep -c 'Test case.*passed'` counts each parameterized-test ARGUMENT INSTANCE (~2,677 at 6b344b5); the xcresult summary counts test FUNCTIONS (~2,515 at the same tree). Cross-method comparison is meaningless — pin baselines to ONE method (repo baseline uses stdout counting) and never treat the xcresult figure as lost tests (chased and reconciled 2026-07-24, Phase 5 audit) #testing #xcodebuild
+
+## Relations
+- relates_to [[Testing Standards]]
+- relates_to [[Swift 6.2 Concurrency Rules]]

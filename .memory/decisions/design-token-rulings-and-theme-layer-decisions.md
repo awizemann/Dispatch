@@ -5,11 +5,11 @@ permalink: dispatch/decisions/design-token-rulings-and-theme-layer-decisions
 tags: [design, tokens, theme]
 source_paths: [Dispatch/DesignSystem, Dispatch/Components/Chip.swift, Dispatch/App/ThemePersistence.swift]
 source_paths_inferred: false
-source_sha: 8d049fbc47ef9ff2f805acff08f21fc3d95f6ead
+source_sha: e24495a2b7b67f6aed88344545a31286318bdd6b
 created: 2026-07-05
 updated: 2026-07-13
-reviewed: 2026-07-20
-reviewed_by: audit:claude-code (background)
+reviewed: 2026-07-30
+reviewed_by: human
 ---
 
 ## Observations

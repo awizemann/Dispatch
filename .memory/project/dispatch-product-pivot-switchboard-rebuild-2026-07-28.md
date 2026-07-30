@@ -5,9 +5,11 @@ permalink: dispatch/project/dispatch-product-pivot-switchboard-rebuild-2026-07-2
 tags: [dispatch, pivot, bus]
 source_paths: [Dispatch/Services/MCPBus, Dispatch/Stores/AppStores.swift]
 source_paths_inferred: false
-source_sha: 4738c8d1f4cb39ace4c5dd75abca831026d7cb9e
+source_sha: e24495a2b7b67f6aed88344545a31286318bdd6b
 created: 2026-07-29
 updated: 2026-07-30
+reviewed: 2026-07-30
+reviewed_by: human
 ---
 ## Observations
 - [fact] This repo is Dispatch, a macOS switchboard: link local repos, install a "dispatch" http entry into each repo's .mcp.json, and external Claude Code sessions ask each other questions over the bus #product

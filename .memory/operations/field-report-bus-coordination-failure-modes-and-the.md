@@ -4,11 +4,11 @@ type: note
 permalink: dispatch/operations/field-report-bus-coordination-failure-modes-and-the
 source_paths: [Dispatch/Services/MCPBus/DispatchRouter.swift, Dispatch/Services/MCPBus/BusProtocolText.swift]
 source_paths_inferred: false
-source_sha: a71c2b9eeb17dacf71380d0688ea097252aad6be
+source_sha: e24495a2b7b67f6aed88344545a31286318bdd6b
 created: 2026-07-15
 updated: 2026-07-30
-reviewed: 2026-07-23
-reviewed_by: audit:claude-code (background)
+reviewed: 2026-07-30
+reviewed_by: human
 ---
 **DISTILLED 2026-07-30 from a much longer field report on an earlier in-app multi-agent prototype's bus.** The failure modes below were observed on that prototype's flat message bus, but the coordination pathology is protocol-shaped, not runtime-shaped, and it applies to Dispatch: a FLAT bus with no reply linkage makes agents answer with a fresh ask instead of an answer, spawning parallel open questions and crossed/stale traffic. Dispatch's `answer_agent`-by-`question_id` design and exactly-once outcome reporting are the direct answer to exactly this failure class.
 

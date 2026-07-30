@@ -4,9 +4,11 @@ type: note
 permalink: dispatch/conventions/bus-map-ui-conventions
 source_paths: [Dispatch/Views/BusMap]
 source_paths_inferred: false
-source_sha: 773387c86eee060e6d47db6e231db0763e659f56
+source_sha: 2e02e96100cf0a74f8c46fde34723901e828595a
 created: 2026-07-30
 updated: 2026-07-30
+reviewed: 2026-07-30
+reviewed_by: audit:claude-code (background)
 ---
 
 BusMapView draws the switchboard itself: stations are projects, lines are projectLink rows that let two projects talk, and a travelling dot runs the line each time a question or answer actually crosses it. It must never disagree with the projects rail — same selection state, two views of it.

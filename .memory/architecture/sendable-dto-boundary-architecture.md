@@ -5,11 +5,11 @@ permalink: dispatch/architecture/sendable-dto-boundary-architecture
 tags: [architecture, swiftui, standard]
 source_paths: [Dispatch/Stores/AppStores.swift, Dispatch/Models/DomainModels.swift, Dispatch/Persistence]
 source_paths_inferred: false
-source_sha: 05abdecf41fe8aece96015bca742a3f1ed4b12d6
+source_sha: e24495a2b7b67f6aed88344545a31286318bdd6b
 created: 2026-07-05
 updated: 2026-07-30
-reviewed: 2026-07-25
-reviewed_by: audit:claude-code (background)
+reviewed: 2026-07-30
+reviewed_by: human
 ---
 
 Portable architecture principle from the kickoff standard (§3), mapped to Dispatch: domain stores (projects, bus/messages, settings) are @Observable @MainActor; the MCP bus client and git service are actors behind `nonisolated protocol`s (see [[Swift 6.2 Concurrency Rules]]). Shipped: GitClient is an actor behind the `GitStatusProviding` protocol — the kickoff-era `Models.swift` sketch that declared `MCPBusClient`/`GitService` as Actor protocols has been superseded by the concrete service actors.
