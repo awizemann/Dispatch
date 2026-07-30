@@ -4,7 +4,7 @@ type: note
 permalink: dispatch/architecture/repo-install-architecture-mcp-json-merge-contract
 source_paths: [Dispatch/Services/MCPBus/RepoMCPInstaller.swift]
 source_paths_inferred: false
-source_sha: 773387c86eee060e6d47db6e231db0763e659f56
+source_sha: 7059b0c3476c8ef00955c1d8a08b35b3b41226cf
 created: 2026-07-30
 updated: 2026-07-30
 ---
