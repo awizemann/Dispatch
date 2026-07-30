@@ -8,7 +8,7 @@ updated: 2026-07-30
 
 ## One-paragraph summary
 
-Dispatch is a native macOS app (Swift 6.2 / SwiftUI, macOS 26+) that acts as a switchboard between the repos you work in. You link local repos as projects; Dispatch merges a `dispatch` http entry into each repo's `.mcp.json`; and the Claude Code sessions you run in those repos — your own sessions, in your own terminals — can then ask each other questions and get answers. Dispatch spawns nothing, edits nothing but the one `.mcp.json` key it owns, and holds no credentials of yours.
+Dispatch is a native macOS app (Swift 6.2 / SwiftUI, macOS 14+) that acts as a switchboard between the repos you work in. You link local repos as projects; Dispatch merges a `dispatch` http entry into each repo's `.mcp.json`; and the Claude Code sessions you run in those repos — your own sessions, in your own terminals — can then ask each other questions and get answers. Dispatch spawns nothing, edits nothing but the one `.mcp.json` key it owns, and holds no credentials of yours.
 
 ## What it is for
 
@@ -37,7 +37,7 @@ Two sessions working in two repos on the same problem cannot see each other. Tod
 
 ## Commercial posture
 
-Developer ID, notarized, non-sandboxed; macOS 26+ only. All dependencies MIT/Apache/BSD.
+Developer ID, notarized, non-sandboxed; macOS 14+ only. All dependencies MIT/Apache/BSD.
 
 ---
 

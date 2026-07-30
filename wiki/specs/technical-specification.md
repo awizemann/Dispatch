@@ -11,7 +11,7 @@ source_paths_inferred: false
 
 > **Status:** this page has been *trimmed*, not re-specified, to describe only what Dispatch actually ships — a bus with four verbs between linked projects. Sections describing a larger, unreleased product (an agent runtime, a work queue, a commit gate, a QA pipeline, a chat surface, a secret scanner, a GitHub client, accounts) have been removed because none of that exists here. A full respec is a later arc — until then, [Architecture Overview](Architecture-Overview) is the fuller picture and the code is the authority.
 
-Target: macOS 26+, Swift 6.2 (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`), Xcode 27 beta, non-sandboxed Developer ID app. Decisions behind each choice live in `.memory/decisions/`.
+Target: macOS 14+, Swift 6.2 (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`), Xcode 27 beta, non-sandboxed Developer ID app. Decisions behind each choice live in `.memory/decisions/`.
 
 ## Layer map
 

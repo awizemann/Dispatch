@@ -4,7 +4,7 @@ This guide gets you building Dispatch locally, linking two repos, and watching o
 
 ## Prerequisites
 
-- **macOS 26 (Tahoe) or later**
+- **macOS 14 (Sonoma) or later**
 - **Xcode 27 beta** at `/Applications/Xcode-beta.app` — `xcode-select` points at CommandLineTools on this machine, so `DEVELOPER_DIR` must be set explicitly (the build scripts do it for you).
 - **Claude Code CLI** installed (`claude` on `$PATH`) — Dispatch never spawns it, but you need it to *be* the sessions on either end. Verify: `claude --version`.
 - **Two git repositories** you actually work in. One repo alone has nobody to ask.
