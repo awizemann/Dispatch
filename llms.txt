@@ -1,0 +1,28 @@
+# Dispatch
+
+> A native macOS switchboard between local repos: link repos as "projects," and the Claude Code sessions you already run in them can ask each other questions over an app-hosted localhost MCP bus.
+
+Dispatch does not run agents. You link two or more git repos as projects inside the app; linking a project merges one `dispatch` entry into that repo's own `.mcp.json` (`{"mcpServers":{"dispatch":{"type":"http","url":"http://127.0.0.1:<port>/bus/<token>"}}}`). From then on, whenever you run `claude` in one of those repos — your own terminal, your own session, nothing Dispatch starts — that session can reach the bus.
+
+The whole agent-facing surface is four tools:
+
+- `ask_agent` — ask another LINKED project's session a question about its own repo. If that project's session is connected right now and you pass `wait_seconds`, the call waits and returns the answer inline; otherwise it returns a pending `question_id` and the answer arrives on a later `check_messages`.
+- `answer_agent` — answer a question addressed to your project. Only the addressee can answer it.
+- `check_messages` — read your inbox: open questions waiting on you, and the outcome (answered or expired) of every question you asked, reported exactly once.
+- `list_projects` — list the projects you are linked to, whether each is connected right now, and how many of its questions are sitting in your inbox.
+
+A human-created project LINK is the entire consent model. `ask_agent` cannot reach a project you have not linked — that fails closed, not silently. Every question and answer is visible in the app's Messages tab, and the human can answer any question themselves instead of waiting on the other session.
+
+Bus content crossing between sessions is framed as DATA, not instructions, before it reaches the receiving model's prompt — one repo's Claude Code session cannot use a bus message to make another repo's session do something its own rules would refuse.
+
+There is no work queue, no commit gate, no QA pipeline, and no accounts. The bus listener binds `127.0.0.1` only.
+
+## Project resources
+
+- [Source code](https://github.com/awizemann/Dispatch) — Swift 6, SwiftUI, native macOS app, GRDB/SQLite persistence.
+- [Wiki](https://github.com/awizemann/Dispatch/wiki) — architecture overview, technical specification, getting-started guide.
+- [Issues](https://github.com/awizemann/Dispatch/issues) — bugs and feature requests.
+
+## License
+
+MIT — https://github.com/awizemann/Dispatch/blob/main/LICENSE
