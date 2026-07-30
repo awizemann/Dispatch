@@ -1,7 +1,7 @@
 # Dispatch
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Platform: macOS 26+](https://img.shields.io/badge/platform-macOS%2026%2B-blue)
+![Platform: macOS 14+](https://img.shields.io/badge/platform-macOS%2014%2B-blue)
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 ![Version: 1.0.0](https://img.shields.io/badge/version-1.0.0-blue)
 
@@ -71,7 +71,7 @@ The merge is value-faithful — your own MCP servers and any other top-level key
 
 **Requirements:**
 
-- macOS 26 (Tahoe) or later
+- macOS 14 (Sonoma) or later
 - Xcode 27 (beta) or later, with Swift 6 strict concurrency
 - The [Claude Code](https://claude.com/claude-code) CLI on your `$PATH` if you want to try the bus end to end — Dispatch never launches it for you, but you need it to *be* the sessions on either side
 

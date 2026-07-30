@@ -6,7 +6,7 @@ Thanks for the interest. Dispatch is a native macOS switchboard between local re
 
 **Requirements:**
 
-- macOS 26 (Tahoe) or later
+- macOS 14 (Sonoma) or later
 - Xcode 27 (beta) or later — Swift 6 strict concurrency
 - The [Claude Code](https://claude.com/claude-code) CLI on your `$PATH` if you want to exercise the bus end to end (`claude --version` to check)
 - Two git repositories to link as projects — one repo alone has nobody to ask
